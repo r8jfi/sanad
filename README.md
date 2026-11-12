@@ -20,15 +20,35 @@
 
 ## Screenshots
 
-| Start | Photograph any paper | Interpreter | Reminders |
+| Start | Messages | Group chat | Sanad does it for you |
 | --- | --- | --- | --- |
-| <img src="docs/screenshots/home.png" width="190"> | <img src="docs/screenshots/explain.png" width="190"> | <img src="docs/screenshots/translate.png" width="190"> | <img src="docs/screenshots/tasks.png" width="190"> |
+| <img src="docs/screenshots/home.png" width="190"> | <img src="docs/screenshots/messages.png" width="190"> | <img src="docs/screenshots/group-chat.png" width="190"> | <img src="docs/screenshots/sanad-acts.png" width="190"> |
+
+| Plan my day | Photograph any paper | Interpreter | Reminders |
+| --- | --- | --- | --- |
+| <img src="docs/screenshots/plan-day.png" width="190"> | <img src="docs/screenshots/explain.png" width="190"> | <img src="docs/screenshots/translate.png" width="190"> | <img src="docs/screenshots/tasks.png" width="190"> |
 
 *(Screenshots use sample data.)*
+
+> **Version 3.** People can now message each other inside Sanad, one-to-one and in groups, without sharing phone numbers, and Sanad can act on it for you ("سوّ قروب فيه سارة ونورة"). It also plans your day from a brain dump, finds where to get something from a photo, remembers what you tell it, can watch your Gmail for what matters, and answers faster by voice. The interface was redesigned in an Apple-like style.
 
 > **Version 2.** The first version ([version 1](https://github.com/r8jfi/sanad/tree/693ea34)) was a chat and voice assistant. Version 2 turns Sanad into a daily helper for the whole family: reminders by voice that reach the phone even when the app is closed, reminding your parents and seeing whether they did it, photographing any paper to have it explained, a face-to-face interpreter, adhkar, and an owner dashboard.
 
 ## Features
+
+### New in version 3
+
+- **Messages (الرسائل)**: one-to-one and group chats between people, with photos and files, in an iMessage-style layout (grouped bubbles with tails, "وصلت" / "قُرئت", time stamps, delete for everyone, mute). Everyone gets a 6-letter code or link to give out instead of a phone number; linked family and friends are already contacts. Group admins add, remove and rename; anyone can leave. Blocking stops one-to-one messages. New messages arrive as notifications.
+- **Sanad acts in Messages**: "سوّ قروب فيه سارة ونورة وسمّه فريق المشروع"، "قل للقروب إن الاجتماع الساعة ١٠"، "وش جاني من رسايل؟". Only people already in your contacts can be added; anything sent can be taken back with one tap.
+- **Plan my day (رتّب يومي)**: say everything on your mind and Sanad turns it into timed reminders around your appointments and prayer times.
+- **Where can I find it? (وين ألقاه؟)**: from a photo or a question, the nearest branch on a map (full screen during a voice call), or shops online.
+- **Memory**: Sanad remembers what you tell it (names, likes, plans) and uses it later; you can see and delete it in Settings.
+- **Gmail (opt-in)**: skips ads and notifies you when something important arrives, optionally to a linked person.
+- **Faster, more natural voice**: shorter wait after you stop talking, the first sentence starts playing while the rest is prepared, greetings answered instantly, and you can interrupt Sanad at any time by talking.
+- **Fewer mix-ups**: tools (interpreter, adhkar, plans, maps, messages) only start when you actually ask for them; a one-off "قل للسواق إني بتأخر" is translated once and done.
+- **Redesign**: two tabs (صوت / كتابة), a menu for everything else, Apple-style details, and a friendly greeting by time of day.
+
+### Everything else
 
 - **Voice-to-voice calls**: the user speaks, Sanad detects when they stop talking, transcribes, answers and speaks back in a Saudi voice, then listens again.
 - **Multi-agent routing**: a lightweight router classifies every message and sends it to the cheapest agent that can handle it.
@@ -80,6 +100,7 @@ The whole app is a single Worker: it serves the page and icons, and handles `/ap
 | `users` | One row per visitor (or `owner`), with role and first/last seen |
 | `conversations` | Title and timestamps, owned by a user |
 | `messages` | Each user/assistant turn, with the agent that answered and its sources |
+| `talk_threads`, `talk_members`, `talk_msgs`, `talk_files` | Chats between people, who is in each and how far they read, the messages, and photos/files (in R2 or in D1 pieces) |
 | `usage` | One row per user per day: messages, voice replies, and counts per agent, incremented atomically with `UPSERT` |
 
 The schema is created automatically on first use and documented in `schema.sql`. Every conversation query is scoped to the signed-in user, so nobody can read, write into or delete another person's chat.
@@ -121,12 +142,13 @@ The source code is private. No API key or password is ever stored in the code or
 
 ## Tests
 
-70 automated tests. The database tests run the worker's real SQL against Node's built-in SQLite, and the push tests decrypt every notification and verify its VAPID signature like a real push service would. Covered: reminders (create, edit, done, snooze, repeat, monthly edge cases), "ذكرني" in chat, family linking and permissions, cron delivery, follow-ups and the morning summary, push host allow-list, voice notes, agent routing and fallback, thinking and tool settings per agent, image and PDF attachments, gender-aware addressing, saved conversations and ownership checks, friend and guest limits, stats, forged-session rejection, CSRF, brute-force lockout, CSP headers, link filtering and pronunciation fixes.
+83 automated tests. The database tests run the worker's real SQL against Node's built-in SQLite, and the push tests decrypt every notification and verify its VAPID signature like a real push service would. Covered: messages and groups (codes, unread and read receipts, files and their safe serving, admins, blocking, account deletion), Sanad acting in messages, intent guards, reminders (create, edit, done, snooze, repeat, monthly edge cases), "ذكرني" in chat, family linking and permissions, cron delivery, follow-ups and the morning summary, push host allow-list, voice notes, agent routing and fallback, thinking and tool settings per agent, image and PDF attachments, gender-aware addressing, saved conversations and ownership checks, friend and guest limits, stats, forged-session rejection, CSRF, brute-force lockout, CSP headers, link filtering and pronunciation fixes.
 
 ## Roadmap
 
-- Streaming replies and sentence-by-sentence speech for lower latency
-- Real-time duplex voice over WebSockets
+- Streaming replies for lower latency
+- Tool use instead of a router, so the model itself picks the right action
+- Real-time duplex voice over WebSockets, and live delivery for Messages
 - Durable Objects for strict per-IP rate limits
 - Native iPhone and Android app, with reminders that ring like a call inside the app
 - WhatsApp channel and per-business knowledge for customer-service use
