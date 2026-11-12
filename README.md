@@ -11,7 +11,6 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Cloudflare-Workers-F38020?logo=cloudflare&logoColor=white" alt="Cloudflare Workers">
-  <img src="https://img.shields.io/badge/Claude-API-D97757" alt="Claude API">
   <img src="https://img.shields.io/badge/ElevenLabs-Voice-000000" alt="ElevenLabs">
   <img src="https://img.shields.io/badge/PWA-installable-5A0FC8" alt="PWA">
 </p>
